@@ -19,7 +19,7 @@ This Python script recursively downloads a website's local HTML pages and assets
 ## Setup
 
 1. Clone the repository:
-git clone https://github.com/yourusername/website-copier.git
+git clone https://github.com/infant06/http_copier.git
 cd website-copier
 
 
@@ -73,6 +73,7 @@ The script will show a progress bar and log assets/pages downloaded. Browse the 
 requests
 beautifulsoup4
 tqdm
+
 
 
 
