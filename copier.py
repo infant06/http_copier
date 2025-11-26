@@ -60,8 +60,8 @@ def download_binary(url, local_path):
                 f.write(chunk)
 
 def extract_urls_from_css(css_text):
-    urls = re.findall(r'url\(([^)]+)\)', css_text, re.IGNORECASE)
-    cleaned = [u.strip(' \'"') for u in urls]
+    urls = re.findall(r'url\((?:\'|"|)(.*?)(?:\'|"|)\)', css_text, re.IGNORECASE)
+    cleaned = [u.strip() for u in urls if u.strip()]
     return cleaned
 
 def process_css(base_url, css_url, root_dir):
@@ -85,6 +85,13 @@ def process_css(base_url, css_url, root_dir):
     except Exception as e:
         print(f"Failed to process CSS {css_url}: {e}")
 
+def extract_urls_from_style(style_text):
+    if not style_text:
+        return []
+    urls = re.findall(r'url\((?:\'|"|)(.*?)(?:\'|"|)\)', style_text, re.IGNORECASE)
+    cleaned = [u.strip() for u in urls if u.strip()]
+    return cleaned
+
 def process_html(base_url, url, root_dir):
     print(f"Processing page: {url}")
     resp = SESSION.get(url, timeout=15)
@@ -104,6 +111,7 @@ def process_html(base_url, url, root_dir):
 
     to_visit = []
 
+    # Download assets referenced in tags
     for tag, attr in asset_attrs:
         for el in soup.find_all(tag):
             link = el.get(attr)
@@ -129,6 +137,34 @@ def process_html(base_url, url, root_dir):
             except Exception as e:
                 print(f"  Failed asset {abs_url}: {e}")
 
+    # Download assets inside inline styles
+    for el in soup.find_all(style=True):
+        style_content = el['style']
+        style_urls = extract_urls_from_style(style_content)
+        if not style_urls:
+            continue
+        new_style = style_content
+        for asset_url in style_urls:
+            abs_url = normalize_url(url, asset_url)
+            if not is_same_origin(base_url, abs_url):
+                continue
+            if is_cdn(abs_url):
+                continue
+
+            local_asset_path = local_path_for_url(root_dir, base_url, abs_url)
+            rel_path = os.path.relpath(local_asset_path, os.path.dirname(local_path_for_url(root_dir, base_url, url)))
+            rel_path = rel_path.replace("\\", "/")
+
+            try:
+                print(f" Downloading inline style asset: {abs_url}")
+                download_binary(abs_url, local_asset_path)
+                new_style = new_style.replace(asset_url, rel_path)
+            except Exception as e:
+                print(f"  Failed inline style asset {abs_url}: {e}")
+
+        el['style'] = new_style
+
+    # Find same origin html pages to crawl next
     for a in soup.find_all("a", href=True):
         href = a["href"]
         abs_url = normalize_url(base_url, href)
