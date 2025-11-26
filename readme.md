@@ -20,6 +20,7 @@ This Python script recursively downloads a website's local HTML pages and assets
 
 1. Clone the repository:
 git clone https://github.com/infant06/http_copier.git
+
 cd website-copier
 
 
@@ -27,6 +28,7 @@ cd website-copier
 2. Create and activate a virtual environment (venv):
 On Windows Powershell:
 python -m venv venv
+
 .\venv\Scripts\Activate
 
 
@@ -73,6 +75,7 @@ The script will show a progress bar and log assets/pages downloaded. Browse the 
 requests
 beautifulsoup4
 tqdm
+
 
 
 
