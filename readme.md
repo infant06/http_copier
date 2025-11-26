@@ -31,7 +31,7 @@ python -m venv venv
 
 
 
-##On Linux/macOS:
+## On Linux/macOS:
 python3 -m venv venv
 source venv/bin/activate
 
@@ -51,7 +51,7 @@ out_dir = "./mirror_output" # Your local folder to save the site
 
 
 
-##Run the script:
+## Run the script:
 
 python copier.py
 
@@ -73,6 +73,7 @@ The script will show a progress bar and log assets/pages downloaded. Browse the 
 requests
 beautifulsoup4
 tqdm
+
 
 
 
